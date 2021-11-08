@@ -11,6 +11,11 @@ const urlDatabase = { //list of urls
   "9sm5xK": "http://www.google.com"
 };
 
+app.get("/urls", (req, res) => {
+  const templateVars = {urls: urlDatabase};
+  res.render("urls_index", templateVars);
+});
+
 app.get("/", (req, res) => { //  / is the root path
   res.send("Hello!");
 });
