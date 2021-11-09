@@ -22,11 +22,11 @@ app.get("/urls", (req, res) => {
 }); 
 
 app.get("/urls/:shortURL", (req, res) => {
-  const short = req.params.shortURL;
-  const templateVars = { shortURL: short, longURL: urlDatabase[short]/* What goes here? */ };
-  console.log("Helllllllllo", templateVars);
-  console.log("Req Params", req.params);
-  console.log(short);
+  const short = req.params.shortURL; //use req.params to get string of :shortURL in the url, whatever the input, stored it in short
+  const templateVars = { shortURL: short, longURL: urlDatabase[short] }; //the short form is short, the long url is the value of the key "short" in the url DB
+  //console.log("Helllllllllo", templateVars);
+  //console.log("Req Params", req.params);
+  //console.log(short);
 
   //res.send(req.params);
   res.render("urls_show", templateVars);
