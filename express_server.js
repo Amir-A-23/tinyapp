@@ -30,14 +30,16 @@ app.get("/urls/new", (req, res) => {
 });
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const shortenedURL = generateUid(); //get the randomized key for the DB 
+  const longURL = req.body.longURL; //get the value for the new DB 
+  urlDatabase[shortenedURL] = longURL; //add to the DB
+  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  res.redirect('/urls'); // go back to the /urls route
 });
+
 app.get("/urls/:shortURL", (req, res) => {
   const short = req.params.shortURL; //use req.params to get string of :shortURL in the url, whatever the input, stored it in short
   const templateVars = { shortURL: short, longURL: urlDatabase[short] }; //the short form is short, the long url is the value of the key "short" in the url DB
-  //console.log("Helllllllllo", templateVars);
-  //console.log("Req Params", req.params);
-  //console.log(short);
 
   //res.send(req.params);
   res.render("urls_show", templateVars);
