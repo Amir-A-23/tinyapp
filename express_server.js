@@ -55,3 +55,8 @@ app.get("/hello", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+// generates a unique id for shortened urls
+function generateUid() {
+  return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
+}
