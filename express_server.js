@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
-
+//set view engine to ejs
 app.set("view engine", "ejs");
 
 
