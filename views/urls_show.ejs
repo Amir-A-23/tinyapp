@@ -16,19 +16,21 @@
       </div>
     <div class="card-footer text-muted">
       <h1>Edit</h1>
+      <!--ADD FORMATTING FOR A TABLE-->
       <form method="POST" action="/urls/<%= shortURL %> ">
         <div class="form-group">
-          <div style="width: 20em;">
+          <div class="justify-content-center">
             <input
-              style="width: 100%"
+              style="width: 20%"
               type="text"
               name="longURL"
               id="longURL"
               value="<%= longURL %> ">
+              <input type="submit" class="btn btn-primary" value="Update" />
+
           </div>
           
     
-            <input type="submit" class="btn btn-primary" value="Update" />
         </div>
       </form>
     </div>

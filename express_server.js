@@ -5,6 +5,9 @@ const app = express();
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 const PORT = 8080; // default port 8080
 
 //set view engine to ejs
@@ -21,12 +24,13 @@ app.get("/", (req, res) => { //  / is the root path
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = {urls: urlDatabase};
+  const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
   res.render("urls_index", templateVars);
 }); 
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {username: req.cookies["username"]};
+  res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
@@ -40,7 +44,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const short = req.params.shortURL; //use req.params to get string of :shortURL in the url, whatever the input, stored it in short
-  const templateVars = { shortURL: short, longURL: urlDatabase[short] }; //the short form is short, the long url is the value of the key "short" in the url DB
+  const templateVars = { shortURL: short, longURL: urlDatabase[short], username: req.cookies["username"]}; //the short form is short, the long url is the value of the key "short" in the url DB
 
   //res.send(req.params);
   res.render("urls_show", templateVars);
@@ -66,11 +70,11 @@ app.get('/urls/:shortURL', (req, res) => {
 
   if (!urlDatabase[shortURL]) {
 
-    res.send("sorry that shortURL does not exist")
+    res.send("sorry that shortURL does not exist");
     return;
   }
   
-  const templateVars = {longURL: urlDatabase[shortURL]};
+  const templateVars = {longURL: urlDatabase[shortURL], username: req.cookies["username"]};
   
   res.render('urls_show', templateVars);
 });
@@ -114,6 +118,37 @@ app.post('/urls/:shortURL/delete', (req, res) =>{
 
 });
 /*******END OF DELETE ROUTE*******/
+
+
+/*****LOGIN ROUTE******/
+
+app.post('/login', (req, res) => {
+
+  //const submittedName = req.body.username;
+  res.cookie('username', req.body.username);
+
+  res.redirect('/urls');
+})
+
+
+
+
+/*****END LOGIN ROUTE******/
+
+/*****LOGIN OUT ROUTE******/
+
+app.post('/logout', (req, res) => {
+
+  //const submittedName = res.body.username;
+  res.clearCookie('username');
+
+  res.redirect('/urls');
+})
+
+//
+
+
+/*****END LOGIN OUT ROUTE******/
 /*
 app.get("/urls.json", (req, res) => { 
   res.json(urlDatabase);
