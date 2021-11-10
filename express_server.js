@@ -18,6 +18,19 @@ const urlDatabase = { //list of urls
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 app.get("/", (req, res) => { //  / is the root path
   res.send("Hello!");
 });
@@ -144,9 +157,25 @@ app.post('/logout', (req, res) => {
 
 /****REGISTER ROUTE ****/
 app.get('/register', (req, res) => {
-res.render('register');
+  //res.clearCookie('username');
+  const templateVars = {username: req.cookies["username"]};
+res.render('register', templateVars);
 })
 
+app.post('/register', (req, res) => {
+  const userId = generateUid();
+  const userEmail = req.body.email;
+  const password = req.body.password;
+  const newUser = {
+    id: userId, 
+    email: userEmail, 
+    password: password
+  };
+  users[userId] = newUser;
+  res.cookie('name', users[userId].id);
+  console.log(users);
+  res.redirect('/urls');
+});
 
 /****END REGISTER ROUTE ****/
 /*
