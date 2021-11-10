@@ -17,16 +17,24 @@
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
+          <th scope="col">Delete</th>
         </tr>
       </thead>
       <tbody>
         <% for(let url in urls) { %>
+
           <tr>
             <td><%= url %></td>
             <td><%= urls[url] %></td>
+            <th scope="col">
+              <form method="POST" action="/urls/<%= url %>/delete">
+                <button type="submit" class="btn btn-outline-danger">Delete</button>
+              </form>
+            </th>
           </tr>
         <% } %>
-        <a href='#'>Shorten url here</a>
+
+        <!-- <a href='#'>Shorten url here</a> -->
       </tbody>
     </table>
   </main>

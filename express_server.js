@@ -44,6 +44,32 @@ app.get("/urls/:shortURL", (req, res) => {
   //res.send(req.params);
   res.render("urls_show", templateVars);
 });
+
+//Redirect short urls to the website of the long url address
+app.get("/u/:shortURL", (req, res) => {
+  //get the shorturl key
+  //find the related value in that key
+  //set it to the long value
+  const shortURLKey = req.params.shortURL; //set the key as the shortURL in the parameters
+  //console.log('FOOBAR: ', shortURLKey);
+  const longURL = urlDatabase[shortURLKey]; //get the value of the key
+  //console.log(urlDatabase[shortURLKey]);
+  res.redirect(longURL); 
+});
+
+//DELETE urls
+app.post('/urls/:shortURL/delete', (req, res) =>{
+
+  // extract the id
+  const shortURLID = req.params.shortURL;
+
+  //delete url from DB
+  delete urlDatabase[shortURLID];
+  console.log('deleted');
+  res.redirect('/urls');
+
+});
+
 /*
 app.get("/urls.json", (req, res) => { 
   res.json(urlDatabase);
