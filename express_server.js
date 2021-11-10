@@ -18,7 +18,6 @@ const urlDatabase = { //list of urls
   "9sm5xK": "http://www.google.com"
 };
 
-
 app.get("/", (req, res) => { //  / is the root path
   res.send("Hello!");
 });
@@ -129,10 +128,6 @@ app.post('/login', (req, res) => {
 
   res.redirect('/urls');
 })
-
-
-
-
 /*****END LOGIN ROUTE******/
 
 /*****LOGIN OUT ROUTE******/
@@ -143,12 +138,17 @@ app.post('/logout', (req, res) => {
   res.clearCookie('username');
 
   res.redirect('/urls');
-})
-
-//
-
+});
 
 /*****END LOGIN OUT ROUTE******/
+
+/****REGISTER ROUTE ****/
+app.get('/register', (req, res) => {
+res.render('register');
+})
+
+
+/****END REGISTER ROUTE ****/
 /*
 app.get("/urls.json", (req, res) => { 
   res.json(urlDatabase);
