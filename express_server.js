@@ -58,7 +58,50 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL); 
 });
 
-//DELETE urls
+/******UPDATE ROUTE*********/
+
+app.get('/urls/:shortURL', (req, res) => {
+  
+  const shortURL = req.params;
+
+  if (!urlDatabase[shortURL]) {
+
+    res.send("sorry that shortURL does not exist")
+    return;
+  }
+  
+  const templateVars = {longURL: urlDatabase[shortURL]};
+  
+  res.render('urls_show', templateVars);
+});
+
+
+// UPDATE => update the info in the db
+app.post('/urls/:shortURL', (req, res) => {
+
+  // extract the short form url
+  const shortURL = req.params.shortURL;
+
+  // extract the long form url
+  const longURL = req.body.longURL;
+  console.log(longURL);
+
+  // update the db
+
+  urlDatabase[shortURL] = longURL;
+  console.log(urlDatabase);
+
+  // redirect
+  res.redirect('/urls');
+
+});
+
+/******END OF UPDATE ROUTE*********/
+
+
+
+
+/*******DELETE ROUTE*******/
 app.post('/urls/:shortURL/delete', (req, res) =>{
 
   // extract the id
@@ -70,7 +113,7 @@ app.post('/urls/:shortURL/delete', (req, res) =>{
   res.redirect('/urls');
 
 });
-
+/*******END OF DELETE ROUTE*******/
 /*
 app.get("/urls.json", (req, res) => { 
   res.json(urlDatabase);
