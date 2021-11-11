@@ -151,27 +151,49 @@ app.post('/urls/:shortURL/delete', (req, res) =>{
 
 
 /*****LOGIN ROUTE******/
+app.get('/login', (req, res) => {
+
+  res.render('login');
+})
 
 app.post('/login', (req, res) => {
 
+  console.log("Someone is trying to login!!");
+  console.log(req.body);
+  // foundUser   <--- a User object {id, email, pass} if found OR null if not found
+  const foundUser = getUserByEmail(req.body.email, users);
+  if (foundUser) {
+      // check their pass
+      // if pass maches what they user inputed in the form (req.body.password)
+      // set a cookie
+      // if not tell em to go away!
+      console.log("FOUND USER <----", foundUser);
+      // res.send('found user!!  :)');
+      res.cookie('email', foundUser.email);
+      res.redirect(`/urls`);
+  } else {
+      res.send('user does not exist :(');
+  }
   //const submittedName = req.body.username;
-  res.cookie('username', req.body.username);
+  //res.cookie('username', req.body.username);
 
   res.redirect('/urls');
-})
+});
 /*****END LOGIN ROUTE******/
 
-/*****LOGIN OUT ROUTE******/
+
+
+/*****LOGINOUT ROUTE******/
 
 app.post('/logout', (req, res) => {
 
   //const submittedName = res.body.username;
   res.clearCookie('username');
 
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
-/*****END LOGIN OUT ROUTE******/
+/*****END LOGINOUT ROUTE******/
 
 /****REGISTER ROUTE ****/
 app.get('/register', (req, res) => {
@@ -255,6 +277,7 @@ function getUserByEmail(email, users) {
     }
   }
 }
+
 
 //in every get get the cookie value === userID, put into variable
 
