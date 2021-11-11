@@ -39,7 +39,7 @@ app.get("/", (req, res) => { //  / is the root path
 
 app.get("/urls", (req, res) => {
 
-  const cookieId = req.cookies["username"];
+  const cookieId = req.cookies["user_id"];
   let user;
   if(cookieId) {
      user = validateCookie(cookieId, users);
@@ -49,7 +49,7 @@ app.get("/urls", (req, res) => {
 }); 
 
 app.get("/urls/new", (req, res) => {
-  const cookieId = req.cookies["username"];
+  const cookieId = req.cookies["user_id"];
   let user;
   if(cookieId) {
      user = validateCookie(cookieId, users);
@@ -58,7 +58,6 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
   const shortenedURL = generateUid(); //get the randomized key for the DB 
   const longURL = req.body.longURL; //get the value for the new DB 
   urlDatabase[shortenedURL] = longURL; //add to the DB
@@ -68,7 +67,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const short = req.params.shortURL; //use req.params to get string of :shortURL in the url, whatever the input, stored it in short
-  const cookieId = req.cookies["username"];
+  const cookieId = req.cookies["user_id"];
   let user;
   if(cookieId) {
      user = validateCookie(cookieId, users);
@@ -102,7 +101,7 @@ app.get('/urls/:shortURL', (req, res) => {
     res.send("sorry that shortURL does not exist");
     return;
   }
-  const cookieId = req.cookies["username"];
+  const cookieId = req.cookies["user_id"];
   let user;
   if(cookieId) {
      user = validateCookie(cookieId, users);
@@ -143,7 +142,7 @@ app.post('/urls/:shortURL/delete', (req, res) =>{
 
   //delete url from DB
   delete urlDatabase[shortURLID];
-  //console.log('deleted');
+
   res.redirect('/urls');
 
 });
@@ -157,25 +156,22 @@ app.get('/login', (req, res) => {
 })
 
 app.post('/login', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+ 
 
-  console.log("Someone is trying to login!!");
-  console.log(req.body);
-  // foundUser   <--- a User object {id, email, pass} if found OR null if not found
-  const foundUser = getUserByEmail(req.body.email, users);
-  if (foundUser) {
-      // check their pass
-      // if pass maches what they user inputed in the form (req.body.password)
-      // set a cookie
-      // if not tell em to go away!
-      console.log("FOUND USER <----", foundUser);
-      // res.send('found user!!  :)');
-      res.cookie('email', foundUser.email);
-      res.redirect(`/urls`);
-  } else {
-      res.send('user does not exist :(');
+  const foundUser = getUserByEmail(email, users);
+  if (!foundUser) {
+    res.status(403);
+    res.send('ERROOOOOOOOOOOOR: USER NOT FOUND');
+     return;
   }
-  //const submittedName = req.body.username;
-  //res.cookie('username', req.body.username);
+  if(foundUser.password !== password ) {
+    res.status(403);
+    res.send('ERROOOOOOOOOOOOR: INCORRECT PASSWORD');
+    return;
+  }
+  res.cookie('user_id', foundUser.id);
 
   res.redirect('/urls');
 });
@@ -183,22 +179,22 @@ app.post('/login', (req, res) => {
 
 
 
-/*****LOGINOUT ROUTE******/
+/*****LOGOUT ROUTE******/
 
 app.post('/logout', (req, res) => {
 
   //const submittedName = res.body.username;
-  res.clearCookie('username');
+  res.clearCookie('user_id');
 
   res.redirect('/login');
 });
 
-/*****END LOGINOUT ROUTE******/
+/*****END LOGOUT ROUTE******/
 
 /****REGISTER ROUTE ****/
 app.get('/register', (req, res) => {
   //res.clearCookie('username');
-  const cookieId = req.cookies["username"];
+  const cookieId = req.cookies["user_id"];
   let user;
   if(cookieId) {
      user = validateCookie(cookieId, users);
@@ -211,7 +207,14 @@ app.post('/register', (req, res) => {
   const userId = generateUid();
   const userEmail = req.body.email;
   const password = req.body.password;
-  if(userEmail === '' || password === '') {
+
+  const newUser = {
+    id: userId, 
+    email: userEmail, 
+    password: password
+  };
+
+  if(!userEmail || !password) {
     res.status(400);
     res.send('Invalid email or password');
     return;
@@ -223,18 +226,12 @@ app.post('/register', (req, res) => {
     res.send('Error: Email is already in use!');
     return;
   }
-  
-  const newUser = {
-    id: userId, 
-    email: userEmail, 
-    password: password
-  };
 
   users[userId] = newUser;
 
 
-  res.cookie('username', userId);
-  //console.log(users);
+  res.cookie('user_id', userId);
+
   res.redirect('/urls');
 });
 
@@ -277,8 +274,6 @@ function getUserByEmail(email, users) {
     }
   }
 }
-
-
 //in every get get the cookie value === userID, put into variable
 
 //use that userID variable to find the key of the object we want, looping
