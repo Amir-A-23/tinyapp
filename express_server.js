@@ -18,6 +18,8 @@ const urlDatabase = { //list of urls
   "9sm5xK": "http://www.google.com"
 };
 
+
+
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -36,13 +38,23 @@ app.get("/", (req, res) => { //  / is the root path
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
+
+  const cookieId = req.cookies["username"];
+  let user;
+  if(cookieId) {
+     user = validateCookie(cookieId, users);
+  }
+  const templateVars = {urls: urlDatabase, user};
   res.render("urls_index", templateVars);
 }); 
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = {username: req.cookies["username"]};
-  res.render("urls_new", templateVars);
+  const cookieId = req.cookies["username"];
+  let user;
+  if(cookieId) {
+     user = validateCookie(cookieId, users);
+  }
+  res.render("urls_new", user);
 });
 
 app.post("/urls", (req, res) => {
@@ -56,7 +68,12 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const short = req.params.shortURL; //use req.params to get string of :shortURL in the url, whatever the input, stored it in short
-  const templateVars = { shortURL: short, longURL: urlDatabase[short], username: req.cookies["username"]}; //the short form is short, the long url is the value of the key "short" in the url DB
+  const cookieId = req.cookies["username"];
+  let user;
+  if(cookieId) {
+     user = validateCookie(cookieId, users);
+  }
+  const templateVars = { shortURL: short, longURL: urlDatabase[short], user}; //the short form is short, the long url is the value of the key "short" in the url DB
 
   //res.send(req.params);
   res.render("urls_show", templateVars);
@@ -85,11 +102,16 @@ app.get('/urls/:shortURL', (req, res) => {
     res.send("sorry that shortURL does not exist");
     return;
   }
-  
-  const templateVars = {longURL: urlDatabase[shortURL], username: req.cookies["username"]};
+  const cookieId = req.cookies["username"];
+  let user;
+  if(cookieId) {
+     user = validateCookie(cookieId, users);
+  }
+  const templateVars = {longURL: urlDatabase[shortURL], user};
   
   res.render('urls_show', templateVars);
 });
+
 
 
 // UPDATE => update the info in the db
@@ -100,12 +122,12 @@ app.post('/urls/:shortURL', (req, res) => {
 
   // extract the long form url
   const longURL = req.body.longURL;
-  console.log(longURL);
+  //console.log(longURL);
 
   // update the db
 
   urlDatabase[shortURL] = longURL;
-  console.log(urlDatabase);
+  //console.log(urlDatabase);
 
   // redirect
   res.redirect('/urls');
@@ -114,18 +136,14 @@ app.post('/urls/:shortURL', (req, res) => {
 
 /******END OF UPDATE ROUTE*********/
 
-
-
-
 /*******DELETE ROUTE*******/
 app.post('/urls/:shortURL/delete', (req, res) =>{
 
-  // extract the id
-  const shortURLID = req.params.shortURL;
+  urlsID = req.params.shortURL;
 
   //delete url from DB
   delete urlDatabase[shortURLID];
-  console.log('deleted');
+  //console.log('deleted');
   res.redirect('/urls');
 
 });
@@ -158,7 +176,12 @@ app.post('/logout', (req, res) => {
 /****REGISTER ROUTE ****/
 app.get('/register', (req, res) => {
   //res.clearCookie('username');
-  const templateVars = {username: req.cookies["username"]};
+  const cookieId = req.cookies["username"];
+  let user;
+  if(cookieId) {
+     user = validateCookie(cookieId, users);
+  }
+  const templateVars = {user};
 res.render('register', templateVars);
 })
 
@@ -166,14 +189,30 @@ app.post('/register', (req, res) => {
   const userId = generateUid();
   const userEmail = req.body.email;
   const password = req.body.password;
+  if(userEmail === '' || password === '') {
+    res.status(400);
+    res.send('Invalid email or password');
+    return;
+  }
+  const user = getUserByEmail(userEmail, users);
+
+  if(user) {
+    res.status(400);
+    res.send('Error: Email is already in use!');
+    return;
+  }
+  
   const newUser = {
     id: userId, 
     email: userEmail, 
     password: password
   };
+
   users[userId] = newUser;
-  res.cookie('name', users[userId].id);
-  console.log(users);
+
+
+  res.cookie('username', userId);
+  //console.log(users);
   res.redirect('/urls');
 });
 
@@ -192,7 +231,32 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+
+
+
+//*************************************************FUNCTIONS****************************************************/
+
 // generates a unique id for shortened urls
 function generateUid() {
   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
 }
+
+function validateCookie(cookieId, users) {
+  const user = users[cookieId];
+  return user;
+
+}
+
+
+function getUserByEmail(email, users) {
+  for(let userId in users) {
+    if(users[userId].email === email) {
+      return users[userId];
+    }
+  }
+}
+
+//in every get get the cookie value === userID, put into variable
+
+//use that userID variable to find the key of the object we want, looping
+//pass that specific key object to templateVars
