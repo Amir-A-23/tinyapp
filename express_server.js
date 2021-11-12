@@ -5,18 +5,13 @@ const app = express();
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-//const cookieParser = require("cookie-parser");
-//app.use(cookieParser());
-
 const cookieSession = require("cookie-session");
 app.use(cookieSession({
   name: "session",
   keys: ["The most secure cookie ever","key123"]
 }));
 
-
 const bcrypt = require('bcryptjs');
-
 
 const { urlDatabase, users } = require('./data/userData');
 const { generateUid, validateCookie, getUserByEmail, validateUrls } = require('./helpers/helperFunctions');
@@ -39,6 +34,7 @@ app.get("/urls", (req, res) => {
   const cookieId = req.session.user_id;
   let user;
   let urls;
+  //if cookie exists make sure it is the correct user 
   if (cookieId) {
     user = validateCookie(cookieId, users);
     urls = validateUrls(cookieId, urlDatabase);
@@ -48,15 +44,16 @@ app.get("/urls", (req, res) => {
   res.redirect("logged_out");
 });
 
-
+//when adding new long url, check if logged in 
 app.get("/urls/new", (req, res) => {
   const cookieId = req.session.user_id;
   let user;
-  if (cookieId) {
+  if (cookieId) { //if logged in
     user = validateCookie(cookieId, users);
     const templateVars = { user };
-    res.render("urls_new", templateVars);
+    res.render("urls_new", templateVars); 
   }
+  //if not logged in redirect
   res.redirect('/login');
 });
 
@@ -95,11 +92,13 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const cookieId = req.session.user_id;
   let user;
+  //if the short url does not exist in the db or match
   if (!urlDatabase[req.params.shortURL]) {
 
     res.send("sorry that shortURL does not exist");
     return;
   }
+  //if short url matched check if user is logged in
   if (cookieId) {
     user = validateCookie(cookieId, users);
     const templateVars = { user, shortURL: req.params.shortURL, urls: urlDatabase}; //the short form is short, the long url is the value of the key "short" in the url DB
@@ -107,13 +106,9 @@ app.get("/urls/:shortURL", (req, res) => {
     //res.send(req.params);
     res.render("urls_show", templateVars);
   }
+  //if not logged in
   res.redirect("logged_out");
 });
-
-
-
-
-
 
 /******UPDATE ROUTE*********/
 
@@ -149,12 +144,6 @@ app.post('/urls/:shortURL', (req, res) => {
 
 /******END OF UPDATE ROUTE*********/
 
-
-
-
-
-
-
 /*******DELETE ROUTE*******/
 app.post('/urls/:shortURL/delete', (req, res) =>{
 
@@ -179,13 +168,6 @@ app.post('/urls/:shortURL/delete', (req, res) =>{
 });
 /*******END OF DELETE ROUTE*******/
 
-
-
-
-
-
-
-
 /*****LOGIN ROUTE******/
 app.get('/login', (req, res) => {
   res.render('login');
@@ -200,14 +182,7 @@ app.post('/login', (req, res) => {
     res.send('ERROR: USER NOT FOUND');
     return;
   }
-
-//get the password from the obj
-  //const user = validateCookie(cookieId, users);
-  //console.log(hashedPassword);
-
-  //if (bcrypt.hashSync("purple-monkey-dinosaur") === hashedPassword)) { ... }
-
-
+  //compare hashed password to the password thats in the db that is already hashed
   if (!bcrypt.compareSync(password, foundUser.password)) {
     res.status(403);
     res.send('ERROR: INCORRECT PASSWORD');
@@ -224,13 +199,6 @@ app.post('/login', (req, res) => {
 /*****END LOGIN ROUTE******/
 
 
-
-
-
-
-
-
-
 /*****LOGOUT ROUTE******/
 //app.get to read the information 
 app.get("/logged_out", (req, res) => {
@@ -245,13 +213,9 @@ app.get("/logged_out", (req, res) => {
   res.render("logged_out", templateVars);
 });
 
-
 app.post('/logout', (req, res) => {
-
-  //const submittedName = res.body.username;
-  //res.clearCookie('user_id');
+  //deleting cookie session
   req.session.user_id = null;
-  //res.clearCookie('user_password');
   req.session.user_password = null;
 
 
@@ -260,25 +224,11 @@ app.post('/logout', (req, res) => {
 
 /*****END LOGOUT ROUTE******/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /****REGISTER ROUTE ****/
 app.get('/register', (req, res) => {
-  //res.clearCookie('username');
   const cookieId = req.session.user_id;
   let user;
+ 
   if (cookieId) {
     user = validateCookie(cookieId, users);
   }
@@ -291,6 +241,7 @@ app.post('/register', (req, res) => {
   const userEmail = req.body.email;
   const password = req.body.password;
    
+  //if not a correct format for a email or password
   if (!userEmail || !password) {
     res.status(400);
     res.send('Invalid email or password');
@@ -298,21 +249,24 @@ app.post('/register', (req, res) => {
   }
   const user = getUserByEmail(userEmail, users);
   
+  //if trying to register with an email that is already in the db
   if (user) {
     res.status(400);
     res.send('Error: Email is already in use!');
     return;
   }
 
-
+  //encrypt the password 
   const hashedPassword = bcrypt.hashSync(password, 10);
 
+  //populate new user
   const newUser = {
     id: userId,
     email: userEmail,
     password: hashedPassword
   };
 
+  //add user to user DB
   users[userId] = newUser;
   //res.cookie('user_id', userId);
   req.session.user_id = userId;
