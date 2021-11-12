@@ -18,6 +18,7 @@ function getUserByEmail(email, users) {
       return users[userId];
     }
   }
+  //return null;
 };
 
 function validateUrls(cookieId, urls) {
