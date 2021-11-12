@@ -33,9 +33,10 @@ app.get("/urls", (req, res) => {
   if (cookieId) {
     user = validateCookie(cookieId, users);
     urls = validateUrls(cookieId, urlDatabase);
-  }
   const templateVars = {urls: urls, user};
   res.render("urls_index", templateVars);
+  }
+  res.redirect("logged_out");
 });
 
 
@@ -92,11 +93,12 @@ app.get("/urls/:shortURL", (req, res) => {
   }
   if (cookieId) {
     user = validateCookie(cookieId, users);
+    const templateVars = { user, shortURL: req.params.shortURL, urls: urlDatabase}; //the short form is short, the long url is the value of the key "short" in the url DB
+  
+    //res.send(req.params);
+    res.render("urls_show", templateVars);
   }
-  const templateVars = { user, shortURL: req.params.shortURL, urls: urlDatabase}; //the short form is short, the long url is the value of the key "short" in the url DB
-
-  //res.send(req.params);
-  res.render("urls_show", templateVars);
+  res.redirect("logged_out");
 });
 
 
@@ -127,7 +129,12 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // UPDATE => update the info in the db
 app.post('/urls/:shortURL', (req, res) => {
-
+  const cookieId = req.cookies["user_id"];
+  if(!cookieId){
+    res.status(403);
+    res.send('ERROR Please login First');
+    return;
+  }
   // extract the short from url
   const shortURL = req.params.shortURL;
 
@@ -157,7 +164,13 @@ app.post('/urls/:shortURL', (req, res) => {
 app.post('/urls/:shortURL/delete', (req, res) =>{
 
   const shortURLID = req.params.shortURL;
-
+  const cookieId = req.cookies["user_id"];
+  // Testing user ability to delete
+  if(!cookieId){
+    res.status(403);
+    res.send('ERROR Please login First');
+    return;
+  }
   //delete url from DB
   delete urlDatabase[shortURLID];
 
@@ -209,6 +222,19 @@ app.post('/login', (req, res) => {
 
 
 /*****LOGOUT ROUTE******/
+//app.get to read the information 
+app.get("/logged_out", (req, res) => {
+  const cookieID = req.cookies["user_id"];
+  let user;
+  let urls;
+  if (cookieID) {
+    user = validateCookie(cookieID, users);
+    urls = validateUrls(cookieID, urlDatabase);
+  }
+  const templateVars = { user, urls: urls };
+  res.render("logged_out", templateVars);
+});
+
 
 app.post('/logout', (req, res) => {
 
@@ -243,7 +269,7 @@ app.get('/register', (req, res) => {
     user = validateCookie(cookieId, users);
   }
   const templateVars = {user};
-  res.render('register', templateVars);
+  return res.render('register', templateVars);
 });
 
 app.post('/register', (req, res) => {
