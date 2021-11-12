@@ -1,7 +1,7 @@
 const urlDatabase = { //list of urls
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "aJ48lW"
+    userID: "userRandomID"
 },
 i3BoGr: {
     longURL: "https://www.google.ca",
