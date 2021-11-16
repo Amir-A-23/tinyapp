@@ -2,11 +2,11 @@ const urlDatabase = { //list of urls
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
     userID: "userRandomID"
-},
-i3BoGr: {
+  },
+  i3BoGr: {
     longURL: "https://www.google.ca",
     userID: "aJ48lW"
-}
+  }
 };
 
 const users = {

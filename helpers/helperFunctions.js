@@ -8,7 +8,7 @@ function generateUid() {
 //pass that specific key object to templateVars
 function validateCookie(cookieId, users) {
   const user = users[cookieId];
-  if(!user) {
+  if (!user) {
     return Error("Error: Invalid User");
   }
   return user;
@@ -22,7 +22,7 @@ function getUserByEmail(email, users) {
     }
   }
   //return null;
-};
+}
 
 function validateUrls(cookieId, urls) {
   const matchUrl = {};
@@ -33,6 +33,6 @@ function validateUrls(cookieId, urls) {
     }
   }
   return matchUrl;
-};
+}
 
 module.exports = { generateUid, validateCookie, getUserByEmail, validateUrls };
