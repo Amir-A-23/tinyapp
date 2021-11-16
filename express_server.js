@@ -24,9 +24,9 @@ app.set("view engine", "ejs");
 
 
 /*****************ROUTES***************/
-
+//!FIXED redirect to urls page if logged in, to logged_out if out.
 app.get("/", (req, res) => { //  / is the root path
-  res.send("Hello!");
+  res.redirect("/urls");
 });
 
 app.get("/urls", (req, res) => {
@@ -41,7 +41,7 @@ app.get("/urls", (req, res) => {
   const templateVars = {urls: urls, user};
   res.render("urls_index", templateVars);
   }
-  res.redirect("logged_out");
+  res.redirect("/logged_out");
 });
 
 //when adding new long url, check if logged in 
@@ -54,7 +54,7 @@ app.get("/urls/new", (req, res) => {
     res.render("urls_new", templateVars); 
   }
   //if not logged in redirect
-  res.redirect('/login');
+  res.redirect('/logged_out');
 });
 
 app.post("/urls", (req, res) => {
@@ -68,7 +68,7 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL,
     userID: req.session.user_id
   }
-  console.log('DB======', urlDatabase);
+  //console.log('DB ======', urlDatabase);
   res.redirect(`/urls/${shortenedURL}`); // go back to the /urls route
 });
 
@@ -94,8 +94,8 @@ app.get("/urls/:shortURL", (req, res) => {
   let user;
   //if the short url does not exist in the db or match
   if (!urlDatabase[req.params.shortURL]) {
-
-    res.send("sorry that shortURL does not exist");
+    //!ADDED RELEVENT ERROR MESSAGE
+    res.send("Please login to access urls");
     return;
   }
   //if short url matched check if user is logged in
@@ -169,8 +169,13 @@ app.post('/urls/:shortURL/delete', (req, res) =>{
 /*******END OF DELETE ROUTE*******/
 
 /*****LOGIN ROUTE******/
+//!FIXED HEADERS FOR LOGGING IN AND REGISTERING
 app.get('/login', (req, res) => {
-  res.render('login');
+  let user;
+    //urls = validateUrls(cookieId, urlDatabase);
+  const templateVars = {user};
+  //res.render("urls_index", templateVars);
+  res.render('login', templateVars);
 });
 
 app.post('/login', (req, res) => {

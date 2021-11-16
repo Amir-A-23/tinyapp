@@ -8,8 +8,11 @@ function generateUid() {
 //pass that specific key object to templateVars
 function validateCookie(cookieId, users) {
   const user = users[cookieId];
+  if(!user) {
+    return Error("Error: Invalid User");
+  }
   return user;
-
+  
 }
 
 function getUserByEmail(email, users) {
