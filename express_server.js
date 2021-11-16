@@ -59,6 +59,8 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const cookieId = req.session.user_id;
+  console.log('Long URL from ejs', req.body.longURL.length);
+
   if (!cookieId) {
     return res.send('ERROR Please login First');
   }
@@ -79,12 +81,13 @@ app.get("/u/:shortURL", (req, res) => {
   //find the related value in that key
   //set it to the long value
   if (!urlDatabase[req.params.shortURL]) {
-    return res.send("ERRORRR =>>> Enter a valid url");
+    return res.send("ERROR: Enter a valid url");
   }
 
   const longURL = urlDatabase[req.params.shortURL].longURL; //get the value of the key
-
-  //console.log(urlDatabase[shortURLKey]);
+  const google = 'http://www.google.com';
+  console.log(google.length);
+  console.log(longURL.length);
   return res.redirect(longURL);
 });
 
@@ -95,18 +98,22 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
 
   //console.log(user_id);
-  //!ADDED CHECKS TO MAKE SURE USER IS LOGGED IN AS THE WRITE USERID
+  //!FIXED ADDED CHECKS TO MAKE SURE USER IS LOGGED IN AS THE WRITE USERID
   if (!user_id) {
     res.status(403);
     return res.send('ERROR: Please login First');
   }
+  if (!urlDatabase[shortURL]) {
+    res.status(403);
+    return res.send('ERROR: shortURL not found');
+  }
   if (user_id !== urlDatabase[shortURL].userID) {
     res.status(403);
-    return res.send('ERROR: shortURL not found in your account');
+    return res.send('ERROR: ACCESS DENIED');
   }
   //if the short url does not exist in the db or match
   if (!urlDatabase[req.params.shortURL]) {
-    //!ADDED RELEVENT ERROR MESSAGE
+    //!FIXED ADDED RELEVENT ERROR MESSAGE
     return res.send("Please login to access urls");
   }
   //if short url matched check if user is logged in
@@ -124,6 +131,7 @@ app.get("/urls/:shortURL", (req, res) => {
 /******UPDATE ROUTE*********/
 
 // UPDATE => update the info in the db
+//!FIXED - ADDED CORRECT LINKS AND ROUTING FOR WHEN LONGURL IS UPDATED
 app.post('/urls/:shortURL', (req, res) => {
   const user_id = req.session.user_id;
   const shortURL = req.params.shortURL;
@@ -141,7 +149,7 @@ app.post('/urls/:shortURL', (req, res) => {
 
   // extract the long form url
   const longURL = req.body.longURL;
-  //console.log('Long URL: ', longURL);
+  //console.log('Long URL: ', longURL.length);
 
   // update the db
 
@@ -227,8 +235,8 @@ app.get("/logged_out", (req, res) => {
 
 app.post('/logout', (req, res) => {
   //deleting cookie session
-  req.session.user_id = null;
-  req.session.user_password = null;
+  req.session = null;
+  //req.session.user_password = null;
 
 
   return res.redirect('/login');
