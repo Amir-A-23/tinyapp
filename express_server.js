@@ -91,6 +91,19 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const cookieId = req.session.user_id;
   let user;
+  const user_id = req.session.user_id;
+  const shortURL = req.params.shortURL;
+
+  //console.log(user_id);
+  //!ADDED CHECKS TO MAKE SURE USER IS LOGGED IN AS THE WRITE USERID
+  if (!user_id) {
+    res.status(403);
+    return res.send('ERROR: Please login First');
+  }
+  if (user_id !== urlDatabase[shortURL].userID) {
+    res.status(403);
+    return res.send('ERROR: shortURL not found in your account');
+  }
   //if the short url does not exist in the db or match
   if (!urlDatabase[req.params.shortURL]) {
     //!ADDED RELEVENT ERROR MESSAGE
@@ -114,6 +127,8 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post('/urls/:shortURL', (req, res) => {
   const user_id = req.session.user_id;
   const shortURL = req.params.shortURL;
+  //console.log('user session id: ', user_id);
+  //console.log('user DB ID', urlDatabase[shortURL].userID);
   if (!user_id) {
     res.status(403);
     return res.send('ERROR: Please login First');
