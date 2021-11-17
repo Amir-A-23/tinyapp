@@ -80,7 +80,6 @@ app.get("/u/:shortURL", (req, res) => {
   }
 
   const longURL = urlDatabase[req.params.shortURL].longURL; //get the value of the key
-  const google = 'http://www.google.com';
   return res.redirect(longURL);
 });
 
