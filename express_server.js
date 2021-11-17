@@ -21,10 +21,7 @@ const PORT = 8080; // default port 8080
 //set view engine to ejs
 app.set("view engine", "ejs");
 
-
-
 /*****************ROUTES***************/
-//!FIXED redirect to urls page if logged in, to logged_out if out.
 app.get("/", (req, res) => { //  / is the root path
   return res.redirect("/urls");
 });
@@ -38,6 +35,7 @@ app.get("/urls", (req, res) => {
   if (cookieId) {
     user = validateCookie(cookieId, users);
     urls = validateUrls(cookieId, urlDatabase);
+    
     const templateVars = {urls: urls, user};
     return res.render("urls_index", templateVars);
   }
@@ -59,8 +57,6 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const cookieId = req.session.user_id;
-  console.log('Long URL from ejs', req.body.longURL.length);
-
   if (!cookieId) {
     return res.send('ERROR Please login First');
   }
@@ -69,7 +65,6 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL,
     userID: req.session.user_id
   };
-  //console.log('DB ======', urlDatabase);
   return res.redirect(`/urls/${shortenedURL}`); // go back to the /urls route
 });
 
@@ -86,8 +81,6 @@ app.get("/u/:shortURL", (req, res) => {
 
   const longURL = urlDatabase[req.params.shortURL].longURL; //get the value of the key
   const google = 'http://www.google.com';
-  console.log(google.length);
-  console.log(longURL.length);
   return res.redirect(longURL);
 });
 
@@ -97,8 +90,6 @@ app.get("/urls/:shortURL", (req, res) => {
   const user_id = req.session.user_id;
   const shortURL = req.params.shortURL;
 
-  //console.log(user_id);
-  //!FIXED ADDED CHECKS TO MAKE SURE USER IS LOGGED IN AS THE WRITE USERID
   if (!user_id) {
     res.status(403);
     return res.send('ERROR: Please login First');
@@ -113,7 +104,6 @@ app.get("/urls/:shortURL", (req, res) => {
   }
   //if the short url does not exist in the db or match
   if (!urlDatabase[req.params.shortURL]) {
-    //!FIXED ADDED RELEVENT ERROR MESSAGE
     return res.send("Please login to access urls");
   }
   //if short url matched check if user is logged in
@@ -131,12 +121,9 @@ app.get("/urls/:shortURL", (req, res) => {
 /******UPDATE ROUTE*********/
 
 // UPDATE => update the info in the db
-//!FIXED - ADDED CORRECT LINKS AND ROUTING FOR WHEN LONGURL IS UPDATED
 app.post('/urls/:shortURL', (req, res) => {
   const user_id = req.session.user_id;
   const shortURL = req.params.shortURL;
-  //console.log('user session id: ', user_id);
-  //console.log('user DB ID', urlDatabase[shortURL].userID);
   if (!user_id) {
     res.status(403);
     return res.send('ERROR: Please login First');
@@ -145,17 +132,10 @@ app.post('/urls/:shortURL', (req, res) => {
     res.status(403);
     return res.send('ERROR: URL NOT FOUND');
   }
-  // extract the short from url
-
   // extract the long form url
   const longURL = req.body.longURL;
-  //console.log('Long URL: ', longURL.length);
-
   // update the db
-
   urlDatabase[shortURL].longURL = longURL;
-  //console.log(urlDatabase);
-
   // redirect
   return res.redirect('/urls');
 
@@ -186,7 +166,6 @@ app.post('/urls/:shortURL/delete', (req, res) =>{
 /*******END OF DELETE ROUTE*******/
 
 /*****LOGIN ROUTE******/
-//!FIXED HEADERS FOR LOGGING IN AND REGISTERING
 app.get('/login', (req, res) => {
   let user;
   //urls = validateUrls(cookieId, urlDatabase);
@@ -246,6 +225,7 @@ app.post('/logout', (req, res) => {
 
 /****REGISTER ROUTE ****/
 app.get('/register', (req, res) => {
+  //check userid and send it to header to allow header to check if user is true
   const cookieId = req.session.user_id;
   let user;
  
@@ -296,16 +276,7 @@ app.post('/register', (req, res) => {
 });
 
 /****END REGISTER ROUTE ****/
-/*
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-*/
-/*
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n"); //sent a response to be rendering in client broswer as html
-});
-*/
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
